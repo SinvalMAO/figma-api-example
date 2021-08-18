@@ -1,0 +1,19 @@
+{
+  "name": "figma-api-example",
+  "version": "1.0.0",
+  "description": "Um exemplo de consumo da API do Figma para integrações de Design system",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SinvalMAO/figma-api-example.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://github.com/SinvalMAO/figma-api-example/blob/main/README.md",
+  "dependencies": {
+    "request": "^2.88.2"
+  }
+}
