@@ -91,3 +91,10 @@ Alguns comandos do projeto estão prontos para as seguintes tarefas abaixo:
 
 1. Para os processos de deploy automatizado baseado em mudanças o Figma recomenda que utilizemos os Webhooks V2 que nos informa as mudanças no projeto do Figma e nos da informação para tratamentos em nossos scripts e ambientes integrados.
 
+   * Podemos encontrar todos os Webhooks [aqui](https://www.figma.com/developers/api#webhooks_v2). 
+
+## Versionamento o Figma
+
+1. É possível criar versões semânticas no Figma como na imagem abaixo.
+
+![alt text](examples/figma-version.png)
