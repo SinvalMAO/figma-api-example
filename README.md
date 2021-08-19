@@ -1,98 +1,93 @@
-# Figma style generator
-
-## Please note that this is currently a proof of concept and is not ready to be used. I hope this proves to be useful to anyone who is also playing around with Figma's API
+# FIGMA API GATEWAY
 
 ## Overview
-This tool allows a user to export a scss file containing all the font, gradient, and color variables for a given document. Functionality could be expanded to include standard button styles and general component styles.
 
-## Usage
-- Users download the style guide template file and create a style guide in figma. 
-  - The template document has named artboards which needed by the tool to identify the components on the artboard and how to handle them.
-- Users copy and paste the artboard ID into the text field on the tool
-- Users click generate style
-- The tool outputs a typography.scss file, colors.scss file and a variables.scss file
+Nesse projeto vamos abordar algumas possibilidades de consumo dos recursos gerados no FIGMA, para serem utilizados de diversas formas o intuido é mostrar essas possibilidades para serem aplicadas maneira que decidir ser mais produtivo no seu dia-a-dia de seu processo de desenvolvimento.
 
-## Specification
+## Utilização
 
-### Colors
-#### Flat Colors
-1. RGB values get stored into an object with the following properties:
-    1. `name`: string (eg. `'$blue'`)
-    2. `r`: int (0 - 255)
-    3. `g`: int (0 - 255)
-    4. `b`: int (0 - 255)
-    5. `a`: float (0.0 - 1.0)
-    6. `hex`: string (eg. `'#e567a0'`)
-    7. `cssColor`: string (valid css color definition) 
-    8. `reference`: string (eg. `'$blue'`), reference to another color by color name, default (`None`)
-2. HEX code is generated from RBG colors and saved as `hex` on the color object.
-3. cssColor value is generated
-    1. If `a !== 0`;
-        1. cssColor = `rgba(hex, a)`
-    2. else;
-        1. cssColor = `hex`
-4. The color name is assigned based on the name of the object on the figma file.
-    1. text is converted to lowercase.
-    2. spaces get converted to hyphens. 
-    3. `$` is prepended to the name.
-5. The color object is pushed into the `flatColors` array.
-4. SCSS is generated
-    1. For each color object:
-        1. a color variable is defined
-            1. eg. `$blue: #0000ff;`
-        2. a number of css selectors are created
-            1. `.color-<color-name>` sets `color`
-            2. `.bg-<color-name>` sets `background-color`
+Alguns comandos do projeto estão prontos para as seguintes tarefas abaixo:
+
+1. Criar arquivo JSON com todo o `response` vindo do `figma`.
+
+    * No terminal digitar `npm start` para gerar no diretório `models` o arquivo com `response`, dependendo do seu projeto no figma esse arquivo pode ser muito extenso.
+    * O exemplo oficial desse payload pode ser encontrado também [aqui](https://www.figma.com/developers/api#access-tokens).
+    ```json
+    {
+      "components": {},
+      "document": {
+        "children": [
+          {
+            "backgroundColor": {
+              "a": 1,
+              "b": 0.8980392156862745,
+              "g": 0.8980392156862745,
+              "r": 0.8980392156862745
+            },
+            "children": [],
+            "exportSettings": [],
+            "id": "0:1",
+            "name": "Page 1",
+            "type": "CANVAS",
+            "visible": true
+          }
+        ],
+        "id": "0:0",
+        "name": "Document",
+        "type": "DOCUMENT",
+        "visible": true
+      },
+      "schemaVersion": 0
+    }
+    ```
    
-#### Gradients
-1. Figma object on colors artboard is checked if it contains a gradient. 
-    1. Gradient objects get processed after all colors are processed
-2. A gradient object is created containing properties:
-    1. `name`: string (eg `'green-gradient'`)
-    2. `colors`: array of strings, references color name ( see flat colors )
-    3. `gradientHandles`: array of floats 
-    4. `angle`: float (0.0 - 360.0)
-3. For each gradient a series of new color objects are created with the names `<gradient-name>-position-<num>` 
-4. Each new color is pushed to the the `gradientColors` array
-5. Each color in the gradient is checked with the existing colors in the `flatColors` array
-6. if no color variable exists;
-    1. the color object created in step 4 is populated as per the specification for flat colors
-7. if the color variable does exist;
-    1. the color object is populated with a reference to the flat color variable name.
-8. `angle` is calculated trigonometrically by taking the start and end positions of the gradient handles 
-9. SCSS is generated
-    1. For each gradient object:
-        1. two gradient variables are defined
-            1. normal: eg. `$blue-gradient: linear-gradient(0deg, $blue-gradient-1 0%, $blue-gradient-2 100%);`
-            2. reversed: eg. `$blue-gradient-reversed: linear-gradient(0deg, $blue-gradient-2 0%, $blue-gradient-1 100%);`
-        2. a number of css selectors are created
-            1. `.bg-<gradient-name>` sets `background-color` to gradient
-            2. `.bg-<gradient-name>-reversed` sets `background-color` to reversed gradient 
-### Typography
-1. Each text object on the figma fonts artboard is processed
-    1. Desktop fonts should be suffixed with `-lg` on the figma file. 
-    2. Mobile fonts should be suffixed with `-xs` on the figma file.
-    3. Tablet fonts do not need to be specified as they will be interpolated.
-    4. standard 
-1. for each font group (eg. `h1-lg`, `h1-xs`) a font group object is created:
-    1. `name`: sting (group name eg. `h1`)
-    2. `sizes`: object of typography objects {`xs`, `sm`, `md`, `lg`}
-    3. `classes`: array of strings (eg `['h1', '.font-style-one']`) 
-2. Data from the figma json file populates a typography object is created for `xs` and `lg` containing the following properties:
-    1. `name`: string (generated based on figma names (eg. `h1-lg`))
-    2. `color`: string, references color name ( see flat colors )
-    3. `font-family`: string
-    4. `font-weight`: int
-    5. `fontSize`: int
-    6. `textAlignVertical`: string
-    7. `letterSpacing`: int,
-    8. `lineHeightPercent`: int
-3. data for `sm` and `md` are generated through interpolation of `xs` and `lg`
-    1. `sm = xs + (lg - xs)/3`
-    2. `md = xs + (2 * (lg - xs))/3`
-4. SCSS is generated
-    1. For each font group object a css selector is created
-        1. joining array or classes on a `,` (`h1, .font-style-one`) 
-        2. this gives each of the heading tags automatic styling as well as the possibility of overriding the style using the `font-style` class.
-    2. each size maps to a media query eg `@include('>md')`
+## Implementação
+
+1. Para consumir a API é necessário utilizar o `OAuth 2.0` com algumas propriedades encontradas no FIGMA.
+
+   * Primeiro precisamos do `ID` do arquivo encontrado em um projeto Figma.
    
+   * Se vc utiliza o aplicativo do Figma no Windows pode seguir o passo do exemplo abaixo.
+   
+   ![alt text](examples/adquirir-link.png)
+
+   * O link tem esse formato: `https://www.figma.com/file/ycBsmtPQCzyLHA3ac4p1T1/FIGMA-API-EXAMPLE?node-id=10%3A2307`.
+   
+   * O `ID` do arquivo é o que vem logo depois de `file/`, `ID: ycBsmtPQCzyLHA3ac4p1T1`.
+   
+   * Com o `ID` do arquivo no Figma agora precisaremos de um `Session Token` que é adquirido [aqui](https://www.figma.com/developers/api#access-tokens).
+
+   ![alt text](examples/get-token.png)
+
+   * Clicando no link da imagem a cima `+ Get personal access token What's this?` ele revelará o seu token.
+
+   ![alt text](examples/token.png)
+
+   * **ATENÇÃO**: Você deve ter uma conta no Figma e estar logado na pagina para o token poder ser gerado, se não possui pode adquirir por [aqui](https://www.figma.com).
+   
+   * Ultimo passo agora é fazer a request para o Figma como no exemplo de código node abaixo.
+   
+   ```javascript
+   const request = require("request");
+
+   const FILE_ID = 'ycBsmtPQCzyLHA3ac4p1T1';
+   const TOKEN = `224876-e8f26b47-8311-4d00-9cfe-cc3048bad5b4`;
+   
+   const options = {
+     method: 'GET',
+     url: 'https://api.figma.com/v1/files/' + FILE_ID,
+     headers: {
+       'X-Figma-Token': TOKEN
+     }
+   };
+   
+   request(options, function (error, response) {
+     if (error) throw new Error(error);
+     console.log(response);
+   });
+   ```
+   
+## Integrações CI/CD
+
+1. Para os processos de deploy automatizado baseado em mudanças o Figma recomenda que utilizemos os Webhooks V2 que nos informa as mudanças no projeto do Figma e nos da informação para tratamentos em nossos scripts e ambientes integrados.
+
