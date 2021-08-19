@@ -2,9 +2,9 @@
   "name": "figma-api-example",
   "version": "1.0.0",
   "description": "Um exemplo de consumo da API do Figma para integrações de Design system",
-  "main": "main.js",
+  "main": "src/app.js",
   "scripts": {
-    "start": "node main.js"
+    "start": "node src/app.js"
   },
   "repository": {
     "type": "git",
